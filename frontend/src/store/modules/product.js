@@ -1,31 +1,37 @@
-import axios from 'axios'
+import axios from '../../axios-auth'
 import Vue from 'vue'
 
-axios.defaults.xsrfCookieName = 'csrftoken'
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+
 
 const state = {
     products : [],
     authUser: {},
     isAuthenticated: false,
-    jwt: localStorage.getItem('token'),
+    jwt: localStorage.getItem('access_token'),
     endpoints: {
       // TODO: Remove hardcoding of dev endpoints
-      obtainJWT: 'http://127.0.0.1:8000/api/v1/auth/obtain_token/',
-      refreshJWT: 'http://127.0.0.1:8000/api/v1/auth/refresh_token/',
-      baseUrl: 'http://127.0.0.1:8000/api/v1/'
+      obtainJWT: 'auth/token/',
+      refreshJWT: 'auth/refresh_token/',
     }
 };
 
 const getters = {
-    allProducts:(state) => state.products
+    allProducts:(state) => state.products,
+    authUser:(state)=> state.authUser,
+    loggedIn (state) {
+      return (state.jwt)
+    },
 };
 
 const actions = {
     async fetchProducts({commit}){
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/store/products/');
+        const response = await axios.get('store/products/');
         console.log(response.data)
-    }
+    },
+    async fetchLoggedInUser({commit}){
+      const response = await axios.get('accounts/user/');
+      console.log(response.data)
+  }
 };
 
 const mutations = {
@@ -36,10 +42,11 @@ const mutations = {
       Vue.set(state, 'authUser', authUser)
       Vue.set(state, 'isAuthenticated', isAuthenticated)
     },
-    updateToken(state, newToken) {
+    updateToken(state, accessToken,refreshToken) {
       // TODO: For security purposes, take localStorage out of the project.
-      localStorage.setItem('token', newToken);
-      state.jwt = newToken;
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
+      state.jwt = accessToken;
     },
     removeToken(state) {
       // TODO: For security purposes, take localStorage out of the project.

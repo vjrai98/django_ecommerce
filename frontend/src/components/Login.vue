@@ -3,7 +3,7 @@
 <v-container fluid class="mb-15">
   <v-layout row>
     <v-flex md6 lg6 sm12 xs12 x6>
-      <img src="../assets/logo.png" width="95%">
+      <img src="../assets/logo.png" width="50%">
      </v-flex>
     <v-flex md6 lg6 sm12 xs12 x6 pl-3>
       <h1 class="white--text font-weight-medium mt-16 d-sm-pl-8 d-xs-pl-6">Roni<span class="red--text">X</span></h1>
@@ -53,9 +53,6 @@
         </v-card>
       </v-dialog>
 <v-btn class="ml-2" outlined color="white"> <router-link to="/signup" tag='span'>Create account</router-link> </v-btn>
-        <template>
-  <v-facebook-login app-id="249506776874638"></v-facebook-login>
-</template>
         <p><v-chip
       color="black"
       text-color="white"
@@ -91,10 +88,11 @@
   </v-footer>
 </div>
 
+
 </template>
 
 <script>
-import axios from 'axios'
+import axiosInstance from '../axios-auth'
 import VFacebookLogin from 'vue-facebook-login-component'
 export default {
   data () {
@@ -111,34 +109,22 @@ export default {
   methods: {
     authenticate () {
       const payload = {
-        email: this.email,
-        password: this.password
+        username: this.email,
+        password: this.password,
+        grant_type: "password",
+        client_id: "0uyb250PnYmQia88JC0fDx1MU54jPQZbUNZ7sR0S",
+        client_secret: "ZV3FI71JHU602flI0ogj8k1BIVKdpyaQhd8qGfIkVX5wOE2itt4fMD4jqmQRxmziJ8Bvcwei8AM90CJEAjc45DVn8cWBOmqRmacp3T0YJiBwx74ssgBR2SLSE5WvsKEB"
       }
-      console.log(this.$store.state)
-      axios.post(this.$store.state.product.endpoints.obtainJWT, payload)
+      
+      axiosInstance.post("auth/token/", payload)
         .then((response) => {
-          console.log(response.data.access)
-          this.$store.commit('updateToken', response.data.access)
+          console.log("response data is :",response.data.access_token)
+          console.log("refresh data is :",response.data.refresh_token)
+          this.$store.commit('updateToken', response.data.access_token,response.data.refresh_token)
+          
           // get and set auth user
           
-          const base = {
-            baseURL: this.$store.state.product.endpoints.baseUrl,
-            headers: {
-            // Set your Authorization to 'JWT' !!
-              Authorization: `Bearer ${this.$store.state.product.jwt}`,
-              'Content-Type': 'application/json'
-            },
-            xhrFields: {
-                withCredentials: true
-            }
-          }
-          console.log(base)
-          const axiosInstance = axios.create(base)
-          axiosInstance({
-            url: "/accounts/users/",
-            method: "get",
-            params: {}
-          })
+          axiosInstance.get("/accounts/user/")
             .then((response) => {
               this.$store.commit("setAuthUser",
                 {authUser: response.data, isAuthenticated: true}

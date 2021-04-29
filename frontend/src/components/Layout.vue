@@ -22,8 +22,13 @@
         class="hidden-sm-and-down pl-10 ml-4"
       />
       <v-spacer />
-      <v-btn icon href='/login'>
-        <v-icon>mdi-account-circle</v-icon>
+      <v-btn icon href='/profile'  v-if="loggedIn">
+        <v-icon >mdi-account-circle</v-icon>
+        {{this.$store.state.product.authUser.first_name}}
+      </v-btn>
+      <v-btn icon href='/login'  v-else>
+        <v-icon >mdi-account-circle</v-icon>
+        login
       </v-btn>
       <v-btn icon>
         <v-badge
@@ -155,7 +160,12 @@ import {mapGetters, mapActions} from 'vuex';
         methods:{
           ...mapActions(['fetchProducts'])
         },
-        computed: mapGetters(['allProducts']),
+        computed: {
+          ...mapGetters([
+            'loggedIn',
+            'authUser' 
+          ]),
+            },
         created(){
           this.fetchProducts();
         }
